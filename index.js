@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const { getReport } = require("./service");
 const { generatePdfFromRouters } = require("./generatePdf");
+const { loadPdf, filenameByDateRange, storePdf } = require("./fileStorage");
 
 app.use(cors())
 
@@ -13,14 +14,21 @@ app.get("/", (_, res) => {
 app.get("/print-report", async (req, res) => {
     try {
         const { token, start_date, end_date } = req.query;
-        const report = await getReport(token, start_date, end_date);
-        const pdfBuffer = await generatePdfFromRouters(report, start_date, end_date);
+        const loadCacheFile = loadPdf(filenameByDateRange(start_date, end_date));
+        let pdfBuffer = null;
+        if (loadCacheFile) {
+            pdfBuffer = loadCacheFile;
+        } else {
+            const report = await getReport(token, start_date, end_date);
+            pdfBuffer = await generatePdfFromRouters(report, start_date, end_date);
+            storePdf(pdfBuffer, start_date, end_date);
+        }
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline; filename="document.pdf"');
+        res.setHeader('Content-Disposition', 'inline; filename="report.pdf"');
 
         res.send(Buffer.from(pdfBuffer));
     } catch (e) {
-        res.status(500).send(e.message);
+        res.status(e.response?.status || 500).send(e.message);
     }
 })
 

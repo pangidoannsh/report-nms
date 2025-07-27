@@ -9,6 +9,15 @@ async function _getDataTraffic(access_token, start_date, end_date) {
     return res.data.data ?? [];
 }
 
+function fixedMegabits(byte) {
+    const toMb = byte * 8 / (1_000_000)
+    if (toMb >= 1) {
+        return Math.floor(toMb + 0.4);
+    } else {
+        return Number(toMb.toFixed(2));
+    }
+}
+
 async function getReport(access_token, start_date, end_date) {
     const trafficData = await _getDataTraffic(access_token, start_date, end_date);
     const routerList = trafficData.map(t => {
@@ -30,11 +39,12 @@ async function getReport(access_token, start_date, end_date) {
             currentUpload: t.CurrentTxData,
             avgUpload: avgUpload.toFixed(1),
             avgDownload: avgDownload.toFixed(1),
-            bandwidth: (t.Bandwidth || 0) * 8 / 1_000_000
+            bandwidth: fixedMegabits((t.Bandwidth || 0) * 8 / 1_000_000)
         }
     })
     return routerList;
 }
+
 module.exports = {
     getReport
 }

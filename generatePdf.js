@@ -3,7 +3,7 @@ const { PDFDocument, StandardFonts, rgb: pdfLibRgb } = require('pdf-lib');
 const rgb = (red, green, blue) => {
     return pdfLibRgb(red / 255, green / 255, blue / 255)
 }
-const { storePdf } = require('./storage');
+const { storePdf } = require('./fileStorage');
 const fs = require("fs");
 const dayjs = require('dayjs');
 require("dayjs/locale/id")
