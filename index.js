@@ -20,7 +20,7 @@ app.get("/print-report", async (req, res) => {
 
         res.send(Buffer.from(pdfBuffer));
     } catch (e) {
-        res.status(500).send(e.message);
+        res.status(e.response?.status || 500).send(e.message);
     }
 })
 
